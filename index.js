@@ -69,6 +69,49 @@ function defineRegisterBlocks() {
     })
 }
 
+function defineMemoryBlocks() {
+    let memoryBlocks = Object.keys(registerLists).map(key => {
+        return {
+            type: `m${key}`,
+            message0: `${key}bit memory %1`,
+            args0: [
+                {
+                    type: "field_number",
+                    name: "MEMORY",
+                    value: 0
+                }
+            ],
+            output: `m${key}`,
+            colour: 60,
+        }
+    })
+    memoryBlocks.push({
+        type: `m64_string`,
+        message0: `Pointer to string %1`,
+        args0: [
+            {
+                type: "field_input",
+                name: "STRING",
+                text: ""
+            }
+        ],
+        output: `m64`,
+        colour: 60,
+    })
+    Blockly.defineBlocksWithJsonArray(memoryBlocks);
+    window.toolbox.contents.push({
+        kind: 'category',
+        name: 'Memory',
+        contents: memoryBlocks.map(block => {
+            return {
+                kind: 'block',
+                type: block.type
+            }
+        }
+        )
+    })
+}
+
 function defineImmediateBlocks() {
     let immediateBlocks = Object.keys(registerLists).map(key => {
         return {
@@ -109,8 +152,7 @@ function makeToolbox() {
                 i = 0;
                 let toolboxEntries = [];
                 for (let form of instr.forms) {
-                    if (form.operands == undefined) continue;
-                    let operands = form.operands.map((operand, index) => {
+                    let operands = (form.operands || []).map((operand, index) => {
                         return {
                             type: "input_value",
                             name: `OPERAND${index + 1}`,
@@ -157,6 +199,7 @@ function init() {
     registerSpecials();
     defineRegisterBlocks();
     defineImmediateBlocks();
+    defineMemoryBlocks();
     makeToolbox();
 }
 
